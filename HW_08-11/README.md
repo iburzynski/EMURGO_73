@@ -1,4 +1,4 @@
-# Batch 71: Homework for July 23
+# Batch 73: Homework for August 11
 **Note:** homework assignments are not graded, but it is strongly encouraged to complete them in order to build understanding between sessions and keep up with the pace of the course. It is recommended to spend ~30 min. per day engaging with the homework material.
 
 ## Readings
