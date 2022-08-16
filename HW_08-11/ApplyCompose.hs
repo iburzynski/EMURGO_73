@@ -23,6 +23,7 @@ f `apply` x = f x
 -- This is how the ($) operator works. We can replace `apply` with `$` in our example:
 foo :: [Int]
 foo = filter (> 10) $ map (^2) [1..10]
+--    filter (> 10) . map (^ 2) $ [1 .. 10]
 
 -- Rules for Apply:
 -- The left argument to ($) must be a single-parameter (unary) *function*.
@@ -33,7 +34,7 @@ foo = filter (> 10) $ map (^2) [1..10]
 -- Compose takes two functions with compatible input/output
 -- It returns a new function that applies them both
 compose :: (b -> c) -> (a -> b) -> (a -> c)
-compose g f = (\a -> g (f a))
+compose g f = (\x -> g (f x))
 --             ^ returns a new function awaiting one argument
 --               the function applies `f` to that argument and then applies `g` to the result
 
@@ -64,8 +65,10 @@ blah = map show . filter (> 10) . map (^ 2) $ [1..10]
 --              ^               ^
 --              we can chain as many functions as we want using multiple compose operators
 
+-- map show (filter (> 10) (map (^2) [1 .. 10])))
+
 -- This is not valid syntax:
--- map show . filter (> 10) . map (^ 2) [1..10]
+-- ex1 = map show . filter (> 10) . map (^ 2) [1..10]
 --                          ^ compose expects a function on the right, but we're passing a value
 
 -- This syntax is valid, but not idiomatic Haskell:
@@ -76,12 +79,12 @@ foooo = map show  (filter (> 10)  (map (^ 2) [1..10]))
 -- but Haskellers prefer building composite functions and then applying them to a single input value.
 
 -- This syntax is not valid:
--- map show . filter (> 10) . map (^ 2) ([1..10])
+-- ex2 = map show . filter (> 10) . map (^ 2) ([1..10])
 -- This is due to precedence: regular function application has precedence over infix operators
 -- So GHC tries to treat ([1..10]) as an argument to `map (^2)` rather than the composite function
 -- `map (^ 2) ([1..10])` has type [Int], but the compose operator to its left expects a function
 
-myFunc = map show . filter (> 10) . map (^2)
+showFilteredSquares = map show . filter (> 10) . map (^2)
 
 -- But this syntax is valid:
 blahBlah = (map show . filter (> 10) . map (^ 2)) [1..10]
