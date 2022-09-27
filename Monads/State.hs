@@ -1,4 +1,5 @@
 {-# LANGUAGE InstanceSigs #-}
+
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use tuple-section" #-}
 {-# HLINT ignore "Use const" #-}
@@ -20,7 +21,6 @@ reverseWithCount :: [a] -> (Count -> ([a], Count))
 --   instead of a function with 2 arguments (a list and a count), we'll view it as a function that
 --   takes a list as argument and returns a lambda function `Count -> ([a], Count)`.
 reverseWithCount list = \count -> (reverse list, count + 1) -- <-- state handler
-
 
 -- When we compose multiple stateful computations together, we need to manually apply each of them
 --   within a `let` block, so we can destructure their return values and "thread" the state through:
@@ -57,7 +57,7 @@ append3ReversedWithCount list1 list2 list3 = \count0 -> let
 
 -- We can use this to construct a type by simply wrapping it in a `newtype`:
 newtype State s a = State { runState :: s -> (a, s) }
---                  ^ type wrapper
+--                  ^ constructor wrapper
 --                          ^ getter function
 --                                      ^ state handler
 
@@ -66,17 +66,19 @@ newtype State s a = State { runState :: s -> (a, s) }
 --   a function of type `a -> b` is as valid a piece of data for another type to contain as a value
 --   of type `a` or `b`.
 
--- Our new State type is nothing other than a type wrapper (i.e. value constructor) containing a
+-- Our new State type is nothing other than a wrapper (i.e. value constructor) containing a
 --   state handler function. We can pass `State` values around and run them in our code to perform
 --   stateful operations, as long as we unwrap the handler and supply it a valid state as argument.
 
 -- *** Refactoring with State ***
 -- We'll pretend the Functor, Applicative, and Monad instances already exist, and refactor our code:
 
-reverseWithCountM   :: [a] -> State Count [a]
-reverseWithCountM   list = State (\count -> (reverse list, count + 1))
+reverseWithCountM :: [a] -> State Count [a]
+--                   [a] -> (Count -> ([a], Count))
+reverseWithCountM list = State (\count -> (reverse list, count + 1))
 
-appendReversedWithCountM   :: [a] -> [a] -> State Count [a]
+appendReversedWithCountM :: [a] -> [a] -> State Count [a]
+--                          [a] -> [a] -> (Count -> ([a], Count))
 appendReversedWithCountM list1 list2 =
   reverseWithCountM list1 >>= (\revList1 ->
     --                          ^ each primary return value that we were extracting from the return
